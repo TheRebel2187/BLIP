@@ -13,11 +13,16 @@ class BLIP {
         bool rx();
         connectionDetails queryConnection();
         sachet getLastSachet();
-        BLIP(){};
+        BLIP(){
+            startBLE();
+        };
     private:
         std::vector<packet> packetise(packetType t, packetSubType st, std::vector<uint8_t> p);
         connectionDetails details;
         std::vector<sachet> sachetList;
+        uint16_t BLEHandle = BLE_HS_CONN_HANDLE_NONE;
+        NimBLECharacteristic* txCharacteristic = nullptr;
+        bool startBLE();
         bool txUSB(packet p);
         bool txBLE(packet p);
         bool txWIFI(packet p);
