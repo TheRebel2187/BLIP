@@ -1,7 +1,7 @@
-#include "Blocks/Comms/Subroutines/BLIP.hpp"
-#include "Blocks/Comms/Subroutines/BLIPTypes.hpp"
+#include "BLIP.hpp"
+#include "BLIPTypes.hpp"
 
-//BLIND LOSSY PACKET PROTOCOL BL(i)P
+//BLIND LOSSY PACKET PROTOCOL BL(I)P
 
 
 bool BLIP::txUSB(packet p){}
