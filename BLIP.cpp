@@ -6,58 +6,22 @@
 
 bool BLIP::txUSB(packet p){}
 bool BLIP::txBLE(packet p){
-    //Use BLE open advertising
-    //Should update the current BLE advert to the new packet
-    static bool initialized = false;
-    static bool live = false;
+    if (txCharacteristic == nullptr)
+        return false;
 
-
-    if(!initialized){
-        NimBLEDevice::init("");
-        initialized = true;
-    }
-
- 
-    NimBLEAdvertisementData advData;
     serialPacket sp = p.serialise();
-    std::string manufacturerData(reinterpret_cast<const char*>(sp.data),sp.length);
-    advData.setManufacturerData(manufacturerData);
-    for (unsigned char c : manufacturerData){
-        Serial.printf("%02X ", c);
-    }
-    Serial.println();
+    txCharacteristic->setValue(sp.data,sp.length);
+    txCharacteristic->notify();
 
-    NimBLEAdvertising* advertising = NimBLEDevice::getAdvertising();
-
-    if(live){
-        live = advertising->stop();
-    }
-    advertising->setAdvertisementData(advData);
-    live = advertising->start();
-
-    return live;
+    return true;
 }
+
+
+
 bool BLIP::txWIFI(packet p){}
 bool BLIP::txLORA(packet p){}
 bool BLIP::rxUSB(){}
-bool BLIP::rxBLE(){
-    bool newRead = false;
-
-    NimBLEScan* pScan = NimBLEDevice::getScan();
-    pScan->setActiveScan(false);
-    NimBLEScanResults results = pScan->getResults(1000);
-
-    for (int i = 0; i < results.getCount(); i++) {
-        const NimBLEAdvertisedDevice* device = results.getDevice(i);
-        if (!device.haveManufacturerData()) {
-            continue;
-        }
-
-        std::string data = device.getManufacturerData();
-}
-
-
-}
+bool BLIP::rxBLE(){}
 bool BLIP::rxWIFI(){}
 bool BLIP::rxLORA(){}
 
@@ -142,3 +106,29 @@ std::vector<packet> BLIP::packetise(packetType t, packetSubType st, std::vector<
             }
             return packets;
         };
+
+
+bool BLIP::startBLE(){
+    NimBLEDevice::init("BLIP");
+    NimBLEServer* server = NimBLEDevice::createServer();
+    NimBLEService* service = server->createService("12345678-1234-1234-1234-123456789ABC");
+
+    txCharacteristic = service->createCharacteristic(
+            "12345678-1234-1234-1234-123456789ABD",
+            NIMBLE_PROPERTY::WRITE |
+            NIMBLE_PROPERTY::WRITE_NR |
+            NIMBLE_PROPERTY::NOTIFY
+    );
+
+    service->start();
+    NimBLEAdvertising* advertising = NimBLEDevice::getAdvertising();
+
+    advertising->addServiceUUID(service->getUUID());
+    advertising->start();
+
+    return true;
+}
+
+bool getLORA(){}
+bool getWIFI(){}
+bool getUSB(){}
