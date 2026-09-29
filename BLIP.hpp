@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
-#include "Blocks/Comms/Subroutines/BLIPTypes.hpp"
+#include "BLIPTypes.hpp"
 #include "NimBLEDevice.h"
 #include <Arduino.h>
 
