@@ -4,6 +4,40 @@
 //BLIND LOSSY PACKET PROTOCOL BL(I)P
 
 
+sachet deserialise(std::string d){
+    sachet s;
+
+    
+    uint8_t metaByte1 = static_cast<uint8_t>(d[0]);
+    uint8_t metaByte2 = static_cast<uint8_t>(d[1]);
+
+    // Reverse metaByte1
+    uint8_t header = metaByte1 & 0x03;
+    uint8_t rawType = (metaByte1 >> 2) & 0x03;
+    uint8_t length = (metaByte1 >> 4) & 0x0F;
+
+    // Reverse metaByte2
+    uint8_t rawSubType = metaByte2 & 0x0F;
+    uint8_t checksum = (metaByte2 >> 4) & 0x0F;
+
+    //All residual data is the payload data
+
+    packetType type = static_cast<packetType>(rawType);
+    packetSubType subType = static_cast<packetSubType>(rawSubType);
+
+    std::vector<uint8_t> data;
+    for (size_t i = 2; i < d.size(); ++i){
+        data.push_back(static_cast<uint8_t>(d[i]));
+    }
+
+    packetPayload p(subType,data);
+    s.type = type;
+    s.payload = p;
+
+    return s;
+}
+
+
 bool BLIP::txUSB(packet p){}
 bool BLIP::txBLE(packet p){
     if (txCharacteristic == nullptr)
@@ -21,7 +55,26 @@ bool BLIP::txBLE(packet p){
 bool BLIP::txWIFI(packet p){}
 bool BLIP::txLORA(packet p){}
 bool BLIP::rxUSB(){}
-bool BLIP::rxBLE(){}
+
+
+bool BLIP::rxBLE(){
+    if (rxCharacteristic == nullptr){
+        return false;
+    }
+    std::string data = rxCharacteristic->getValue();
+    //susceptible to losing data if polling too slow 
+
+    if (data.empty()){
+        return false;
+    };
+    
+    sachet s = deserialise(data);
+    sachetList.push_back(s);
+
+    return true;
+}
+
+
 bool BLIP::rxWIFI(){}
 bool BLIP::rxLORA(){}
 
@@ -114,11 +167,17 @@ bool BLIP::startBLE(){
     NimBLEService* service = server->createService("12345678-1234-1234-1234-123456789ABC");
 
     txCharacteristic = service->createCharacteristic(
-            "12345678-1234-1234-1234-123456789ABD",
-            NIMBLE_PROPERTY::WRITE |
-            NIMBLE_PROPERTY::WRITE_NR |
-            NIMBLE_PROPERTY::NOTIFY
+        "12345678-1234-1234-1234-123456789ABD",
+        NIMBLE_PROPERTY::NOTIFY
     );
+
+    rxCharacteristic = service->createCharacteristic(
+        "12345678-1234-1234-1234-123456789ABE",
+        NIMBLE_PROPERTY::WRITE |
+        NIMBLE_PROPERTY::WRITE_NR
+    );
+
+    
 
     service->start();
     NimBLEAdvertising* advertising = NimBLEDevice::getAdvertising();
