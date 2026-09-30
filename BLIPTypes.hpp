@@ -80,7 +80,7 @@ struct sachet{
     //uint8_t length : 4;
     packetPayload payload;
     //uint8_t checksum : 8;
-    //sachet();
+    sachet(){};
 };
 
 enum class mediumType : int{
