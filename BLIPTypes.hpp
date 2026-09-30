@@ -37,6 +37,7 @@ struct packetPayload{
     packetSubType subType : 4;   //This needs ammending but the intention is correct
     std::vector<uint8_t> payload;
     packetPayload(packetSubType st, std::vector<uint8_t> p) : subType(st), payload(std::move(p)) {};
+    packetPayload(){};
 };
 
 struct serialPacket {
@@ -79,6 +80,7 @@ struct sachet{
     //uint8_t length : 4;
     packetPayload payload;
     //uint8_t checksum : 8;
+    //sachet();
 };
 
 enum class mediumType : int{
