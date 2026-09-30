@@ -22,6 +22,7 @@ class BLIP {
         std::vector<sachet> sachetList;
         uint16_t BLEHandle = BLE_HS_CONN_HANDLE_NONE;
         NimBLECharacteristic* txCharacteristic = nullptr;
+        NimBLECharacteristic* rxCharacteristic = nullptr;
         bool startBLE();
         bool txUSB(packet p);
         bool txBLE(packet p);
