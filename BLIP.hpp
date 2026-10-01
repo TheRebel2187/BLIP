@@ -4,6 +4,7 @@
 #include "BLIPTypes.hpp"
 #include "NimBLEDevice.h"
 #include <Arduino.h>
+#include "LoRa.h"
 
 
 class BLIP {
@@ -15,6 +16,7 @@ class BLIP {
         sachet getLastSachet();
         BLIP(){
             startBLE();
+            startLORA();
         };
     private:
         std::vector<packet> packetise(packetType t, packetSubType st, std::vector<uint8_t> p);
@@ -23,6 +25,8 @@ class BLIP {
         uint16_t BLEHandle = BLE_HS_CONN_HANDLE_NONE;
         NimBLECharacteristic* txCharacteristic = nullptr;
         NimBLECharacteristic* rxCharacteristic = nullptr;
+        LoRaClass lora;
+        bool startLORA();
         bool startBLE();
         bool txUSB(packet p);
         bool txBLE(packet p);
