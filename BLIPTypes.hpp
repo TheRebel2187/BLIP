@@ -16,9 +16,9 @@ enum class packetSubType : uint8_t {
     POSE,
     SPECIAL,
     STABILISE,
-    EMOTE,
-    JUMP,
-    STAND,
+    // EMOTE,
+    // JUMP,            //These are going to be passed as payloads so i need to give each an enumerated value to pass
+    // STAND,
     TEST,
     VIDEO,
     AUDIO,
