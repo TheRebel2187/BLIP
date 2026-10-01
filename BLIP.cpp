@@ -107,7 +107,7 @@ bool BLIP::rxLORA(){
 
 sachet BLIP::getLastSachet(){
     sachet p = sachetList.front();
-    sachetList.erase(sahetList.begin());
+    sachetList.erase(sachetList.begin());
     return p;
 };
 
