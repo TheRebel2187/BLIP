@@ -53,7 +53,15 @@ bool BLIP::txBLE(packet p){
 
 
 bool BLIP::txWIFI(packet p){}
-bool BLIP::txLORA(packet p){}
+bool BLIP::txLORA(packet p){
+    bool sent = false;
+    serialPacket sp = p.serialise();
+    lora.beginPacket();
+    lora.write(sp.data,sp.length);
+    lora.endPacket();
+    sent = true;
+    return sent;
+}
 bool BLIP::rxUSB(){}
 
 
@@ -76,7 +84,26 @@ bool BLIP::rxBLE(){
 
 
 bool BLIP::rxWIFI(){}
-bool BLIP::rxLORA(){}
+bool BLIP::rxLORA(){
+    // lora.receive();
+    // int packetSize = LoRa.parsePacket();
+    // if (packetSize == 0){
+    //     return false;
+    // }else{
+    //     uint8_t buf[32];
+    //     int len = 0;
+    //     if (packetSize) {
+    //         while (LoRa.available() && len < sizeof(buf)) {
+    //             buf[len++] = LoRa.read();
+    //         }
+    //     }
+
+
+    //     sachet s = deserialise(data);
+    //     sachetList.push_back(s);
+    // }
+    // return true;
+}
 
 sachet BLIP::getLastSachet(){
     sachet p = sachetList.back();
@@ -188,6 +215,13 @@ bool BLIP::startBLE(){
     return true;
 }
 
-bool getLORA(){}
-bool getWIFI(){}
-bool getUSB(){}
+bool BLIP::startLORA(){
+    bool started = false;
+    lora.setPins(5, 6, 7); // Set the pins for LoRa module (SS, Reset, DIO0)  Currently filler values
+    started = lora.begin(868E6); 
+    return started;
+}
+
+
+bool startWIFI(){}
+bool startUSB(){}
