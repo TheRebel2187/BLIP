@@ -14,8 +14,8 @@ class BLIP {
         bool rx();
         connectionDetails queryConnection();
         sachet getLastSachet();
-        BLIP(){
-            startBLE();
+        BLIP(std::string deviceName){
+            startBLE(deviceName);
             startLORA();
         };
     private:
@@ -27,7 +27,7 @@ class BLIP {
         NimBLECharacteristic* rxCharacteristic = nullptr;
         LoRaClass lora;
         bool startLORA();
-        bool startBLE();
+        bool startBLE(std::string deviceName);
         bool txUSB(packet p);
         bool txBLE(packet p);
         bool txWIFI(packet p);
