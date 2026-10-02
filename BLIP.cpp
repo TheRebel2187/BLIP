@@ -188,8 +188,8 @@ std::vector<packet> BLIP::packetise(packetType t, packetSubType st, std::vector<
         };
 
 
-bool BLIP::startBLE(){
-    NimBLEDevice::init("BLIP");
+bool BLIP::startBLE(std::string deviceName){
+    NimBLEDevice::init(deviceName);
     NimBLEServer* server = NimBLEDevice::createServer();
     NimBLEService* service = server->createService("12345678-1234-1234-1234-123456789ABC");
 
