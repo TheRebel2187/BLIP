@@ -4,7 +4,10 @@
 #include "BLIPTypes.hpp"
 #include "NimBLEDevice.h"
 #include <Arduino.h>
-#include "LoRa.h"
+#include "RadioLib.h"
+//#include "LoRa.h"
+
+
 
 
 class BLIP {
@@ -16,7 +19,7 @@ class BLIP {
         sachet getLastSachet();
         BLIP(std::string deviceName){
             startBLE(deviceName);
-            startLORA();
+            startRF();
         };
     private:
         std::vector<packet> packetise(packetType t, packetSubType st, std::vector<uint8_t> p);
@@ -25,15 +28,16 @@ class BLIP {
         uint16_t BLEHandle = BLE_HS_CONN_HANDLE_NONE;
         NimBLECharacteristic* txCharacteristic = nullptr;
         NimBLECharacteristic* rxCharacteristic = nullptr;
-        LoRaClass lora;
-        bool startLORA();
+        SPIClass rfSPI = SPIClass(FSPI);
+        CC1101 rf = new Module(14,RADIOLIB_NC,RADIOLIB_NC,RADIOLIB_NC,rfSPI);
+        bool startRF();
         bool startBLE(std::string deviceName);
         bool txUSB(packet p);
         bool txBLE(packet p);
         bool txWIFI(packet p);
-        bool txLORA(packet p);
+        bool txRF(packet p);
         bool rxUSB();
         bool rxBLE();
         bool rxWIFI();
-        bool rxLORA();
+        bool rxRF();
 };
