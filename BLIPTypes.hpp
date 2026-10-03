@@ -85,7 +85,7 @@ struct sachet{
 
 enum class mediumType : int{
     BLE,
-    LORA,
+    RF,
     USB,
     WIFI
 };
