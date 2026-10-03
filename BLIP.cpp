@@ -53,12 +53,10 @@ bool BLIP::txBLE(packet p){
 
 
 bool BLIP::txWIFI(packet p){}
-bool BLIP::txLORA(packet p){
+bool BLIP::txRF(packet p){
     bool sent = false;
     serialPacket sp = p.serialise();
-    lora.beginPacket();
-    lora.write(sp.data,sp.length);
-    lora.endPacket();
+    rf.transmit(sp.data,sp.length);
     sent = true;
     return sent;
 }
@@ -84,25 +82,13 @@ bool BLIP::rxBLE(){
 
 
 bool BLIP::rxWIFI(){}
-bool BLIP::rxLORA(){
-    // lora.receive();
-    // int packetSize = LoRa.parsePacket();
-    // if (packetSize == 0){
-    //     return false;
-    // }else{
-    //     uint8_t buf[32];
-    //     int len = 0;
-    //     if (packetSize) {
-    //         while (LoRa.available() && len < sizeof(buf)) {
-    //             buf[len++] = LoRa.read();
-    //         }
-    //     }
-
-
-    //     sachet s = deserialise(data);
-    //     sachetList.push_back(s);
-    // }
-    // return true;
+bool BLIP::rxRF(){
+    String data;
+    rf.receive(data);
+    //sachet s = deserialise(data.c_str());   Change in the future, de-serialise is poorly written
+    //sachetList.push_back(s);
+    
+    return true;
 }
 
 sachet BLIP::getLastSachet(){
@@ -123,8 +109,8 @@ bool BLIP::tx(packetType t, packetSubType st, std::vector<uint8_t> p){
             case mediumType::BLE:
                 sent = txBLE(current);
             break;
-            case mediumType::LORA:
-                sent = txLORA(current);
+            case mediumType::RF:
+                sent = txRF(current);
             break;
             case mediumType::USB:
                 sent = txUSB(current);
@@ -146,8 +132,8 @@ bool BLIP::rx(){
         case mediumType::BLE:
             recieved = rxBLE();
         break;
-        case mediumType::LORA:
-             recieved = rxLORA();
+        case mediumType::RF:
+             recieved = rxRF();
         break;
         case mediumType::USB:
             recieved = rxUSB();
@@ -215,11 +201,15 @@ bool BLIP::startBLE(std::string deviceName){
     return true;
 }
 
-bool BLIP::startLORA(){
-    bool started = false;
-    lora.setPins(5, 6, 7); // Set the pins for LoRa module (SS, Reset, DIO0)  Currently filler values
-    started = lora.begin(868E6); 
-    return started;
+bool BLIP::startRF(){
+    rfSPI.begin(11,12,13,14);
+    int state = rf.begin(433.0);
+    if (state != RADIOLIB_ERR_NONE) {
+        Serial.printf("CC1101 init failed: %d\n", state);
+        return false;
+    }
+
+    return true;
 }
 
 
