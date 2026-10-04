@@ -23,16 +23,27 @@ sachet deserialise(std::string d){
     //All residual data is the payload data
 
     packetType type = static_cast<packetType>(rawType);
-    packetSubType subType = static_cast<packetSubType>(rawSubType);
+    s.type = type;
+
+    switch(type){
+        case packetType::CONTROL:
+            s.subType = static_cast<controlSubType>(rawSubType);
+        break;
+        case packetType::TELEMETRY:
+            s.subType = static_cast<telemetrySubType>(rawSubType);
+        break;
+        case packetType::TOGGLE:
+            s.subType = static_cast<toggleSubType>(rawSubType);
+        break;
+    }
 
     std::vector<uint8_t> data;
     for (size_t i = 2; i < d.size(); ++i){
         data.push_back(static_cast<uint8_t>(d[i]));
     }
+    s.payload = data;
 
-    packetPayload p(subType,data);
-    s.type = type;
-    s.payload = p;
+    
 
     return s;
 }
@@ -68,6 +79,7 @@ bool BLIP::rxBLE(){
         return false;
     }
     std::string data = rxCharacteristic->getValue();
+    rxCharacteristic->setValue(""); 
     //susceptible to losing data if polling too slow 
 
     if (data.empty()){
@@ -97,7 +109,7 @@ sachet BLIP::getLastSachet(){
     return p;
 };
 
-bool BLIP::tx(packetType t, packetSubType st, std::vector<uint8_t> p){
+bool BLIP::tx(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p){
     bool sent = false;
     std::vector<packet> packetList= packetise(t,st,p);
 
@@ -147,7 +159,7 @@ bool BLIP::rx(){
 
 connectionDetails BLIP::queryConnection(){}
 
-std::vector<packet> BLIP::packetise(packetType t, packetSubType st, std::vector<uint8_t> p){
+std::vector<packet> BLIP::packetise(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p){
             int packetSize;
             std::vector<packet> packets;
             switch(t){
