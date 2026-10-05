@@ -93,6 +93,13 @@ struct sachet{
     std::variant<controlSubType, telemetrySubType, toggleSubType> subType;
     std::vector<uint8_t> payload;
     sachet(){};
+    std::string reconstructPayload(){
+        std::string str(
+        reinterpret_cast<const char*>(payload.data()),
+        payload.size()
+        );
+        return str;
+    }
 };
 
 enum class mediumType : int{
