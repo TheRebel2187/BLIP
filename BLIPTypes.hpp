@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <variant>
+#include <string>
 
 #define MAXPACKETSIZE 16
 
