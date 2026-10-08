@@ -14,7 +14,8 @@
 class BLIP {
     public:
         mediumType medium;
-        bool tx(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p);
+        bool tx(std::vector<sachet> s);
+        bool tx(sachet s);
         bool rx();
         connectionDetails queryConnection();
         sachet getLastSachet();
@@ -23,7 +24,7 @@ class BLIP {
             startRF();
         };
     private:
-        std::vector<packet> packetise(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p);
+        //std::vector<packet> packetise(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p);
         connectionDetails details;
         std::vector<sachet> sachetList;
         uint16_t BLEHandle = BLE_HS_CONN_HANDLE_NONE;
