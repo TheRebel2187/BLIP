@@ -5,7 +5,7 @@
 
 
 sachet deserialise(std::string d){
-    sachet s;
+    
 
     
     uint8_t metaByte1 = static_cast<uint8_t>(d[0]);
@@ -23,17 +23,18 @@ sachet deserialise(std::string d){
     //All residual data is the payload data
 
     packetType type = static_cast<packetType>(rawType);
-    s.type = type;
+
+    std::variant<controlSubType, telemetrySubType, toggleSubType> subType;
 
     switch(type){
         case packetType::CONTROL:
-            s.subType = static_cast<controlSubType>(rawSubType);
+            subType = static_cast<controlSubType>(rawSubType);
         break;
         case packetType::TELEMETRY:
-            s.subType = static_cast<telemetrySubType>(rawSubType);
+            subType = static_cast<telemetrySubType>(rawSubType);
         break;
         case packetType::TOGGLE:
-            s.subType = static_cast<toggleSubType>(rawSubType);
+            subType = static_cast<toggleSubType>(rawSubType);
         break;
     }
 
@@ -41,9 +42,9 @@ sachet deserialise(std::string d){
     for (size_t i = 2; i < d.size(); ++i){
         data.push_back(static_cast<uint8_t>(d[i]));
     }
-    s.payload = data;
-
     
+
+    sachet s = sachet(type, subType, data);
 
     return s;
 }
@@ -109,31 +110,31 @@ sachet BLIP::getLastSachet(){
     return p;
 };
 
-bool BLIP::tx(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p){
+bool BLIP::tx(sachet s){
     bool sent = false;
-    std::vector<packet> packetList= packetise(t,st,p);
+    packet p = packet(s);
+    switch(medium){
+        case mediumType::BLE:
+            sent = txBLE(p);
+        break;
+        case mediumType::RF:
+            sent = txRF(p);
+        break;
+        case mediumType::USB:
+            sent = txUSB(p);
+        break;
+        case mediumType::WIFI:
+            sent = txWIFI(p);
+        break;
+    }
+    return sent;
+}
 
-    while(!packetList.empty()){
-        packet current = packetList.front();
-        packetList.erase(packetList.begin());
 
-        switch(medium){
-            case mediumType::BLE:
-                sent = txBLE(current);
-            break;
-            case mediumType::RF:
-                sent = txRF(current);
-            break;
-            case mediumType::USB:
-                sent = txUSB(current);
-            break;
-            case mediumType::WIFI:
-                sent = txWIFI(current);
-            break;
-        }
-        if(!sent){
-            return false;
-        }
+bool BLIP::tx(std::vector<sachet> s){          //This is for where the size of a packet is less than the size of the payload
+    bool sent = false;
+    for(sachet s : s){
+        sent = tx(s);
     }
     return sent;
 }
@@ -159,31 +160,7 @@ bool BLIP::rx(){
 
 connectionDetails BLIP::queryConnection(){}
 
-std::vector<packet> BLIP::packetise(packetType t, std::variant<controlSubType, telemetrySubType, toggleSubType> st, std::vector<uint8_t> p){
-            int packetSize;
-            std::vector<packet> packets;
-            switch(t){
-                case packetType::CONTROL:
-                    packetSize=p.size();
-                break;
-                case packetType::TELEMETRY:
-                    //DYNAMIC PACKET SIZE
-                    packetSize = p.size();
-                break;
-                case packetType::TOGGLE:
-                    //FIXED PACKET SIZE
-                break;
-                case packetType::CHAIN:
-                    packetSize = MAXPACKETSIZE-2;
-                break;
-            }
-            //Break the payload into packets of size packetSize
-            for(int i = 0; i < p.size(); i += packetSize){
-                std::vector<uint8_t> packetPayload(p.begin() + i, p.begin() + std::min(i + packetSize, (int)p.size()));
-                packets.push_back(packet(t, st, packetPayload));
-            }
-            return packets;
-        };
+
 
 
 bool BLIP::startBLE(std::string deviceName){
