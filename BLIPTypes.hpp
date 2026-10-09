@@ -27,17 +27,16 @@ enum class telemetrySubType : uint8_t {
     VIDEO,
     AUDIO,
     GPS,
-    IMU,
+    IMU_ACCEL,
+    IMU_GYRO,
+    IMU_MAG,
     TEMP,
     PRES,
-    MAG,
-    VOLT,
-    CURR,
+    POWER
 };
 
 enum class toggleSubType : uint8_t {
     ALLSENSORS,
-    LOCATION,
     ALLMOVEMENT,
 };
 
@@ -114,8 +113,14 @@ struct sachet{
                     case telemetrySubType::GPS:
                         plaintextSubType = "GPS";
                         break;
-                    case telemetrySubType::IMU:
-                        plaintextSubType = "IMU";
+                    case telemetrySubType::IMU_ACCEL:
+                        plaintextSubType = "IMU_ACCEL";
+                        break;
+                    case telemetrySubType::IMU_GYRO:
+                        plaintextSubType = "IMU_GYRO";
+                        break;
+                    case telemetrySubType::IMU_MAG:
+                        plaintextSubType = "IMU_MAG";
                         break;
                     case telemetrySubType::TEMP:
                         plaintextSubType = "TEMP";
@@ -123,22 +128,13 @@ struct sachet{
                     case telemetrySubType::PRES:
                         plaintextSubType = "PRES";
                         break;
-                    case telemetrySubType::MAG:
-                        plaintextSubType = "MAG";
-                        break;
-                    case telemetrySubType::VOLT:
-                        plaintextSubType = "VOLT";
-                        break;
-                    case telemetrySubType::CURR:
-                        plaintextSubType = "CURR";
+                    case telemetrySubType::POWER:
+                        plaintextSubType = "POWER";
                         break;
                 }
                 break;
             case packetType::TOGGLE:
                 switch (std::get<toggleSubType>(st)) {
-                    case toggleSubType::LOCATION:
-                        plaintextSubType = "LOCATION";
-                        break;
                     case toggleSubType::ALLSENSORS:
                         plaintextSubType = "ALLSENSORS";
                         break;
